@@ -1,0 +1,16 @@
+{
+  "name": "side-dock",
+  "version": "1.0.0",
+  "description": "A draggable, magnetically snapped desktop sidebar for DeepSeek balance, OpenCode Go quota, token usage and system stats.",
+  "license": "MIT",
+  "private": true,
+  "main": "src/main.js",
+  "scripts": {
+    "start": "electron src/main.js",
+    "dump": "electron src/main.js --dump-stats",
+    "build": "node scripts/build-app.mjs"
+  },
+  "engines": {
+    "node": ">=22.15"
+  }
+}
