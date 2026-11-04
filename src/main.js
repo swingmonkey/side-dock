@@ -12,6 +12,8 @@ const path = require('node:path');
 const { app, BrowserWindow, ipcMain, screen } = require('electron');
 const { clamp, nearestEdge, snapEdge, resolveBounds } = require('./geometry.js');
 const { collectSnapshot } = require('./data');
+const { writeSettings, normalizeSettings, readConfig } = require('./data/config');
+const { REGISTRY_IDS } = require('./data/providers');
 
 const POLL_MS = 2000;
 const MIN_WIDTH = 72;
@@ -260,18 +262,17 @@ async function tick(options = {}) {
       loggedFirstTick = true;
       const data = latest.data;
       log(
-        'first snapshot: today=' +
-          data.history.today +
-          ' month=' +
+        'first snapshot: month=' +
           data.history.month +
           ' tokens=' +
           data.totals.total +
-          ' sessions=' +
-          data.sessions.length +
-          ' account=' +
-          data.account.status +
-          ' zen=' +
-          data.zen.status,
+          ' providers=' +
+          data.providers
+            .filter((provider) => provider.enabled)
+            .map((provider) => provider.id + ':' + provider.status)
+            .join(',') +
+          ' shown=' +
+          data.settings.providers.join(','),
       );
     }
   } catch (error) {
@@ -318,6 +319,13 @@ ipcMain.handle('side-dock:flip', () => {
 ipcMain.handle('side-dock:refresh', () => {
   void tick();
   return true;
+});
+ipcMain.handle('side-dock:settings:get', () => normalizeSettings(readConfig(), REGISTRY_IDS));
+ipcMain.handle('side-dock:settings:save', (_event, patch) => {
+  const saved = writeSettings(patch, REGISTRY_IDS);
+  log('settings saved: providers=' + saved.providers.join(',') + ' items=' + JSON.stringify(saved.items));
+  void tick();
+  return saved;
 });
 ipcMain.on('side-dock:renderer-log', (_event, message) => {
   log('renderer: ' + String(message));

@@ -6,7 +6,6 @@ const { execFile } = require('node:child_process');
 const { promisify } = require('node:util');
 const { collectProviders } = require('./providers');
 const { collectSessions } = require('./dsh');
-
 const execFileAsync = promisify(execFile);
 const CPU_MIN_SAMPLE_MS = 400;
 const VM_STAT_TTL_MS = 3000;
@@ -95,7 +94,7 @@ function processSnapshot() {
  * @param {{awaitInitial?: boolean}} options
  */
 async function collectSnapshot(options = {}) {
-  const [{ account, zen }, sessionData] = await Promise.all([
+  const [{ providers, settings }, sessionData] = await Promise.all([
     collectProviders({ awaitInitial: options.awaitInitial }),
     Promise.resolve(collectSessions()),
   ]);
@@ -104,9 +103,8 @@ async function collectSnapshot(options = {}) {
     cpu: cpuSnapshot(),
     memory: await memorySnapshot(),
     process: processSnapshot(),
-    account,
-    zen,
-    sessions: sessionData.sessions,
+    providers,
+    settings,
     totals: sessionData.totals,
     history: sessionData.history,
   };

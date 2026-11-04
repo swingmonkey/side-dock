@@ -5,9 +5,9 @@
     <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline';" />
     <title>Side Dock</title>
     <!--
-      Design language adapted from Javis603/token-monitor (MIT): an edge dock
-      that keeps provider quota rings visible and expands into a detail card
-      (per-provider windows, reset countdowns, day/month totals, sessions).
+      Design language adapted from Javis603/token-monitor (MIT): an edge dock of
+      quota bars — percent, remaining fuel and reset countdown — that expands
+      into a detail card and a settings panel where providers are picked.
       Provider marks are Simple Icons SVG paths (CC0 1.0); the OpenCode and
       DeepSeek names/logos remain trademarks of their owners.
     -->
@@ -137,11 +137,15 @@
         color: var(--fg);
         border-color: var(--line);
       }
+      button.on {
+        background: var(--card2);
+        color: var(--fg);
+        border-color: var(--line);
+      }
       .k {
         font-size: 9px;
         letter-spacing: 0.7px;
         color: var(--fg2);
-        text-transform: uppercase;
         white-space: nowrap;
       }
       .row {
@@ -192,133 +196,109 @@
       .banner.show {
         display: block;
       }
-      .dot {
-        display: inline-block;
-        width: 5px;
-        height: 5px;
-        border-radius: 3px;
-        margin-right: 4px;
-        vertical-align: 1px;
+      .pdot {
+        width: 7px;
+        height: 7px;
+        border-radius: 4px;
+        flex: none;
         background: var(--fg2);
-        opacity: 0.55;
       }
-      .dot.running {
-        background: var(--ok);
-        opacity: 1;
+      .bar {
+        position: relative;
+        height: 4px;
+        border-radius: 2px;
+        background: var(--track);
+        overflow: hidden;
+      }
+      .bar > i {
+        display: block;
+        height: 100%;
+        border-radius: 2px;
+        background: var(--accent);
+        transition: width 420ms cubic-bezier(0.2, 0.8, 0.2, 1), background 200ms ease;
+      }
+
+      /* ---------------- views ---------------- */
+      body.mode-detail #rail,
+      body.mode-panel #rail,
+      body.mode-rail #detail,
+      body.mode-panel #detail,
+      body.mode-rail #panel,
+      body.mode-detail #panel {
+        display: none;
       }
 
       /* ---------------- rail (collapsed edge dock) ---------------- */
-      body.expanded #rail {
-        display: none;
-      }
       #rail {
         display: flex;
         flex-direction: column;
         padding-top: 7px;
-        min-width: 104px;
+        min-width: 108px;
       }
-      .todaybox {
+      .pblock {
         display: flex;
         flex-direction: column;
-        align-items: flex-start;
-        gap: 0;
-        padding-bottom: 6px;
+        gap: 2px;
+        padding: 3px 0 4px;
       }
-      .todaybox .today {
-        font-size: 21px;
-        font-weight: 680;
-        letter-spacing: -0.6px;
-        line-height: 1.1;
-        font-variant-numeric: tabular-nums;
-      }
-      .todaybox .rate {
-        font-size: 9.5px;
-        color: var(--fg2);
-        font-variant-numeric: tabular-nums;
-      }
-      .ringrow {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        padding: 5px 0;
-      }
-      .ringrow + .ringrow {
+      .pblock + .pblock {
         border-top: 1px solid var(--line2);
       }
-      .ringwrap {
-        position: relative;
-        width: 36px;
-        height: 36px;
-        flex: none;
-      }
-      .ringwrap svg.ring {
-        display: block;
-        width: 36px;
-        height: 36px;
-        transform: rotate(-90deg);
-      }
-      .ring-track {
-        fill: none;
-        stroke: var(--track);
-        stroke-width: 3.5;
-      }
-      .ring-fill {
-        fill: none;
-        stroke: var(--accent);
-        stroke-width: 3.5;
-        stroke-linecap: round;
-        transition: stroke-dashoffset 420ms cubic-bezier(0.2, 0.8, 0.2, 1), stroke 200ms ease;
-      }
-      .ring-icon {
-        position: absolute;
-        left: 50%;
-        top: 50%;
-        width: 13px;
-        height: 13px;
-        transform: translate(-50%, -50%);
-        fill: var(--fg);
-      }
-      .ringmeta {
+      .pname {
         display: flex;
-        flex-direction: column;
-        gap: 0;
-        min-width: 0;
-      }
-      .ringmeta .rv {
-        font-size: 12.5px;
-        font-weight: 650;
-        font-variant-numeric: tabular-nums;
-        line-height: 1.15;
-      }
-      .ringmeta .rs {
-        font-size: 9px;
+        align-items: center;
+        gap: 5px;
+        font-size: 9.5px;
+        font-weight: 600;
+        letter-spacing: 0.2px;
         color: var(--fg2);
-        font-variant-numeric: tabular-nums;
         white-space: nowrap;
       }
-      /* DeepSeek balance: the number people actually squint at — keep it large */
-      .balancebox {
-        display: flex;
-        flex-direction: column;
-        gap: 1px;
-        padding: 2px 0 1px;
-      }
-      .balancebox .k {
-        display: inline-flex;
-        align-items: center;
-        gap: 4px;
-        text-transform: none;
-        letter-spacing: 0.2px;
-        font-size: 9.5px;
-      }
-      .balancebox .amount {
-        font-size: 22px;
+      .big {
+        font-size: 21px;
         font-weight: 700;
         letter-spacing: -0.5px;
         line-height: 1.15;
         font-variant-numeric: tabular-nums;
       }
-      /* CPU / MEM: label + large value + thin bar, one cell each */
+      .psub {
+        font-size: 9px;
+        color: var(--fg2);
+        font-variant-numeric: tabular-nums;
+        white-space: nowrap;
+      }
+      .mini {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+        padding: 4px 0 3px;
+      }
+      .mini .mrow {
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        gap: 8px;
+      }
+      .mini .mlabel {
+        font-size: 9px;
+        color: var(--fg2);
+        white-space: nowrap;
+      }
+      .mini .mpct {
+        font-size: 11px;
+        font-weight: 650;
+        font-variant-numeric: tabular-nums;
+        line-height: 1.1;
+      }
+      .mini .msub {
+        font-size: 8.5px;
+        color: var(--fg2);
+        font-variant-numeric: tabular-nums;
+        white-space: nowrap;
+      }
+      .mini .bar {
+        height: 3px;
+      }
       .sysgrid {
         display: flex;
         gap: 6px;
@@ -346,11 +326,14 @@
         height: 3px;
         margin-top: 1px;
       }
+      .empty {
+        font-size: 9.5px;
+        color: var(--fg2);
+        padding: 8px 0;
+        line-height: 1.5;
+      }
 
       /* ---------------- expanded detail ---------------- */
-      body:not(.expanded) #detail {
-        display: none;
-      }
       #detail {
         display: flex;
         flex-direction: column;
@@ -405,6 +388,12 @@
         justify-content: space-between;
         gap: 8px;
       }
+      .qtop .qlabel {
+        font-size: 9px;
+        letter-spacing: 0.7px;
+        color: var(--fg2);
+        white-space: nowrap;
+      }
       .qtop .qv {
         font-size: 11px;
         font-weight: 650;
@@ -417,20 +406,6 @@
         font-size: 9.5px;
         color: var(--fg2);
         font-variant-numeric: tabular-nums;
-      }
-      .bar {
-        position: relative;
-        height: 4px;
-        border-radius: 2px;
-        background: var(--track);
-        overflow: hidden;
-      }
-      .bar > i {
-        display: block;
-        height: 100%;
-        border-radius: 2px;
-        background: var(--accent);
-        transition: width 420ms cubic-bezier(0.2, 0.8, 0.2, 1), background 200ms ease;
       }
       .statrow {
         display: flex;
@@ -453,69 +428,139 @@
         font-variant-numeric: tabular-nums;
         letter-spacing: -0.3px;
       }
-      .session {
+
+      /* ---------------- settings panel ---------------- */
+      #panel {
         display: flex;
         flex-direction: column;
-        gap: 3px;
+        gap: 8px;
+        padding-top: 8px;
+        width: 292px;
+      }
+      .panelhead {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .panelhead .title {
+        font-size: 11.5px;
+        font-weight: 650;
+      }
+      .panelhead button {
+        margin-left: auto;
+        width: auto;
+        height: 19px;
+        padding: 0 8px;
+        font-size: 10px;
+        border: 1px solid var(--line);
+        color: var(--fg);
+      }
+      .pitem {
+        display: flex;
+        align-items: center;
+        gap: 7px;
         padding: 5px 0;
       }
-      .session + .session {
+      .pitem + .pitem {
         border-top: 1px solid var(--line2);
       }
-      .session .s1 {
-        display: flex;
-        align-items: baseline;
-        gap: 5px;
-      }
-      .session .sname {
+      .pmeta {
         flex: 1;
         min-width: 0;
-        font-size: 11px;
+        display: flex;
+        flex-direction: column;
+        gap: 1px;
+      }
+      .pmeta .pn {
+        font-size: 10.5px;
         font-weight: 600;
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
       }
-      .session .stok {
-        font-size: 10.5px;
-        font-weight: 650;
-        font-variant-numeric: tabular-nums;
-      }
-      .session .s2 {
-        display: flex;
-        align-items: baseline;
-        gap: 6px;
-        font-size: 9px;
+      .pmeta .po {
+        font-size: 8.5px;
         color: var(--fg2);
         font-variant-numeric: tabular-nums;
-      }
-      .session .smeta {
-        flex: 1;
-        min-width: 0;
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
       }
-      .session .bar {
-        height: 3px;
-        margin-top: 1px;
+      .pmeta .po.warn {
+        color: var(--warn);
       }
-      .sysrow {
+      .pctl {
         display: flex;
-        align-items: baseline;
-        justify-content: space-between;
-        gap: 8px;
-        font-size: 9.5px;
+        align-items: center;
+        gap: 1px;
+        flex: none;
+      }
+      .pctl button {
+        width: 16px;
+        height: 16px;
+        font-size: 8px;
+        border-radius: 4px;
+      }
+      .pctl button[disabled] {
+        opacity: 0.25;
+        cursor: default;
+        background: transparent;
+      }
+      .sw {
+        position: relative;
+        display: inline-flex;
+        flex: none;
+        width: 26px;
+        height: 15px;
+        margin-left: 3px;
+        -webkit-app-region: no-drag;
+        app-region: no-drag;
+      }
+      .sw input {
+        position: absolute;
+        inset: 0;
+        opacity: 0;
+        margin: 0;
+        cursor: pointer;
+      }
+      .sw i {
+        position: absolute;
+        inset: 0;
+        border-radius: 8px;
+        background: var(--track);
+        transition: background 150ms ease;
+      }
+      .sw i::after {
+        content: '';
+        position: absolute;
+        top: 2px;
+        left: 2px;
+        width: 11px;
+        height: 11px;
+        border-radius: 6px;
+        background: #fff;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
+        transition: transform 150ms cubic-bezier(0.2, 0.8, 0.2, 1);
+      }
+      .sw input:checked + i {
+        background: var(--accent);
+      }
+      .sw input:checked + i::after {
+        transform: translateX(11px);
+      }
+      .hint {
+        font-size: 8.5px;
+        line-height: 1.55;
         color: var(--fg2);
-        font-variant-numeric: tabular-nums;
+        word-break: break-all;
       }
     </style>
   </head>
-  <body data-snap="free" class="rail">
+  <body data-snap="free" class="mode-rail">
     <svg width="0" height="0" style="position: absolute" aria-hidden="true">
       <defs>
         <symbol id="i-opencode" viewBox="0 0 24 24"><path d="M22 24H2V0h20zM17 4.8H7v14.4h10z" /></symbol>
-        <symbol id="i-deepseek" viewBox="0 0 24 24"><path d="M23.748 4.651c-.254-.124-.364.113-.512.233-.051.04-.094.09-.137.137-.372.397-.806.657-1.373.626-.829-.046-1.537.214-2.163.848-.133-.782-.575-1.248-1.247-1.548-.352-.155-.708-.311-.955-.65-.172-.24-.219-.509-.305-.774-.055-.16-.11-.323-.293-.35-.2-.031-.278.136-.356.276-.313.572-.434 1.202-.422 1.84.027 1.436.633 2.58 1.838 3.393.137.094.172.187.129.323-.082.28-.18.553-.266.833-.055.179-.137.218-.328.14a5.5 5.5 0 0 1-1.737-1.179c-.857-.828-1.631-1.743-2.597-2.46a12 12 0 0 0-.689-.47c-.985-.957.13-1.743.387-1.836.27-.098.094-.433-.778-.428-.872.003-1.67.295-2.687.685a3 3 0 0 1-.465.136 9.6 9.6 0 0 0-2.883-.101c-1.885.21-3.39 1.1-4.497 2.622C.082 8.776-.231 10.854.152 13.02c.403 2.284 1.568 4.175 3.36 5.653 1.857 1.533 3.997 2.284 6.438 2.14 1.482-.085 3.132-.284 4.994-1.86.47.234.962.328 1.78.398.629.058 1.235-.031 1.705-.129.735-.155.684-.836.418-.961-2.155-1.004-1.682-.595-2.112-.926 1.095-1.295 2.768-3.598 3.284-6.733.05-.346.115-.834.108-1.114-.004-.171.035-.238.23-.257a4.2 4.2 0 0 0 1.545-.475c1.397-.763 1.96-2.016 2.093-3.517.02-.23-.004-.467-.247-.588M11.58 18.168c-2.088-1.642-3.101-2.183-3.52-2.16-.39.024-.32.472-.234.763.09.288.207.487.371.74.114.167.192.416-.113.603-.673.416-1.842-.14-1.897-.168-1.361-.801-2.5-1.86-3.301-3.306-.775-1.393-1.225-2.888-1.299-4.482-.02-.385.094-.522.477-.592a4.7 4.7 0 0 1 1.53-.038c2.131.311 3.946 1.264 5.467 2.774.868.86 1.525 1.887 2.202 2.89.72 1.066 1.494 2.082 2.48 2.915.348.291.626.513.892.677-.802.09-2.14.109-3.055-.615zm1.001-6.44a.306.306 0 0 1 .415-.287.3.3 0 0 1 .113.074.3.3 0 0 1 .086.214c0 .17-.136.307-.308.307a.303.303 0 0 1-.306-.307m3.11 1.596c-.2.081-.4.151-.591.16a1.25 1.25 0 0 1-.798-.254c-.274-.23-.47-.358-.551-.758a1.7 1.7 0 0 1 .015-.588c.07-.327-.007-.537-.238-.727-.188-.156-.426-.199-.689-.199a.6.6 0 0 1-.254-.078.253.253 0 0 1-.114-.358 1 1 0 0 1 .192-.21c.356-.202.767-.136 1.146.016.352.144.618.408 1.001.782.392.451.462.576.685.915.176.264.336.536.446.848.066.194-.02.353-.25.45" /></symbol>
+        <symbol id="i-deepseek" viewBox="0 0 24 24"><path d="M23.748 4.651c-.254-.124-.364.113-.512.233-.051.04-.094.09-.137.137-.372.397-.806.657-1.373.626-.829-.046-1.537.214-2.163.848-.133-.782-.575-1.248-1.247-1.548-.352-.155-.708-.311-.955-.65-.172-.24-.219-.509-.305-.774-.055-.16-.11-.323-.293-.35-.2-.031-.278.136-.356.276-.313.572-.434 1.202-.422 1.84.027 1.436.633 2.58 1.838 3.393.137.094.172.187.129.323-.082.28-.18.553-.266.833-.055.179-.137.218-.328.14a5.5 5.5 0 0 1-1.737-1.179c-.857-.828-1.631-1.743-2.597-2.46a12 12 0 0 1-.689-.47c-.985-.957.13-1.743.387-1.836.27-.098.094-.433-.778-.428-.872.003-1.67.295-2.687.685a3 3 0 0 1-.465.136 9.6 9.6 0 0 0-2.883-.101c-1.885.21-3.39 1.1-4.497 2.622C.082 8.776-.231 10.854.152 13.02c.403 2.284 1.568 4.175 3.36 5.653 1.857 1.533 3.997 2.284 6.438 2.14 1.482-.085 3.132-.284 4.994-1.86.47.234.962.328 1.78.398.629.058 1.235-.031 1.705-.129.735-.155.684-.836.418-.961-2.155-1.004-1.682-.595-2.112-.926 1.095-1.295 2.768-3.598 3.284-6.733.05-.346.115-.834.108-1.114-.004-.171.035-.238.23-.257a4.2 4.2 0 0 0 1.545-.475c1.397-.763 1.96-2.016 2.093-3.517.02-.23-.004-.467-.247-.588" /></symbol>
       </defs>
     </svg>
 
@@ -524,177 +569,16 @@
         <div class="content" id="content">
           <div class="controls">
             <button id="btn-mode" title="展开详情">⤢</button>
+            <button id="btn-settings" title="选择显示的额度">⚙</button>
             <button id="btn-flip" title="换到另一侧">⇄</button>
             <button id="btn-close" title="退出 Side Dock">✕</button>
           </div>
 
           <div class="banner" id="banner">监视器未连接</div>
 
-          <!-- ---------------- rail ---------------- -->
-          <div id="rail">
-            <div class="todaybox">
-              <span class="k">今日 tokens</span>
-              <span class="today" id="rail-today">—</span>
-              <span class="rate"><span id="rail-rate">0</span> tok/s</span>
-            </div>
-
-            <div class="ringrow">
-              <div class="ringwrap">
-                <svg class="ring" viewBox="0 0 36 36" aria-hidden="true">
-                  <circle class="ring-track" cx="18" cy="18" r="15"></circle>
-                  <circle class="ring-fill" id="ring-rolling" cx="18" cy="18" r="15"></circle>
-                </svg>
-                <svg class="ring-icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-opencode" /></svg>
-              </div>
-              <div class="ringmeta">
-                <span class="k">5 小时</span>
-                <span class="rv" id="ring-rolling-pct">—</span>
-                <span class="rs" id="ring-rolling-reset">—</span>
-              </div>
-            </div>
-
-            <div class="ringrow">
-              <div class="ringwrap">
-                <svg class="ring" viewBox="0 0 36 36" aria-hidden="true">
-                  <circle class="ring-track" cx="18" cy="18" r="15"></circle>
-                  <circle class="ring-fill" id="ring-weekly" cx="18" cy="18" r="15"></circle>
-                </svg>
-                <svg class="ring-icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-opencode" /></svg>
-              </div>
-              <div class="ringmeta">
-                <span class="k">周额度</span>
-                <span class="rv" id="ring-weekly-pct">—</span>
-                <span class="rs" id="ring-weekly-reset">—</span>
-              </div>
-            </div>
-
-            <div class="ringrow">
-              <div class="ringwrap">
-                <svg class="ring" viewBox="0 0 36 36" aria-hidden="true">
-                  <circle class="ring-track" cx="18" cy="18" r="15"></circle>
-                  <circle class="ring-fill" id="ring-monthly" cx="18" cy="18" r="15"></circle>
-                </svg>
-                <svg class="ring-icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-opencode" /></svg>
-              </div>
-              <div class="ringmeta">
-                <span class="k">月额度</span>
-                <span class="rv" id="ring-monthly-pct">—</span>
-                <span class="rs" id="ring-monthly-reset">—</span>
-              </div>
-            </div>
-
-            <div class="rule"></div>
-
-            <div class="balancebox">
-              <span class="k">
-                <svg class="brand deepseek" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-deepseek" /></svg>
-                DeepSeek 余额
-              </span>
-              <span class="amount" id="rail-credit">—</span>
-            </div>
-
-            <div class="rule"></div>
-
-            <div class="sysgrid">
-              <div class="syscell">
-                <span class="k">CPU</span>
-                <span class="sysval" id="rail-cpu">—</span>
-                <div class="bar"><i id="rail-cpu-bar"></i></div>
-              </div>
-              <div class="syscell">
-                <span class="k">MEM</span>
-                <span class="sysval" id="rail-mem">—</span>
-                <div class="bar"><i id="rail-mem-bar"></i></div>
-              </div>
-            </div>
-
-            <div class="row">
-              <span class="k">会话</span>
-              <span class="v sm" id="rail-sessions">—</span>
-            </div>
-            <div class="row">
-              <span class="k">更新</span>
-              <span class="v sm" id="rail-updated">—</span>
-            </div>
-          </div>
-
-          <!-- ---------------- expanded detail ---------------- -->
-          <div id="detail">
-            <div class="card">
-              <div class="cardhead">
-                <svg class="brand deepseek" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-deepseek" /></svg>
-                <span class="title">DeepSeek 额度</span>
-                <span class="headval" id="det-credit">…</span>
-              </div>
-              <div class="cardsub" id="det-credit-sub">—</div>
-            </div>
-
-            <div class="card">
-              <div class="cardhead">
-                <svg class="brand opencode" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-opencode" /></svg>
-                <span class="title">OpenCode Go 额度</span>
-                <span class="state" id="det-zen-state">—</span>
-              </div>
-
-              <div class="qrow">
-                <div class="qtop"><span class="k">5 小时</span><span class="qv" id="det-rolling-left">—</span></div>
-                <div class="bar"><i id="bar-rolling"></i></div>
-                <div class="qsub"><span>重置</span><span id="det-rolling-reset">—</span></div>
-              </div>
-
-              <div class="qrow">
-                <div class="qtop"><span class="k">周额度</span><span class="qv" id="det-weekly-left">—</span></div>
-                <div class="bar"><i id="bar-weekly"></i></div>
-                <div class="qsub"><span>重置</span><span id="det-weekly-reset">—</span></div>
-              </div>
-
-              <div class="qrow">
-                <div class="qtop"><span class="k">月额度</span><span class="qv" id="det-monthly-left">—</span></div>
-                <div class="bar"><i id="bar-monthly"></i></div>
-                <div class="qsub"><span>重置</span><span id="det-monthly-reset">—</span></div>
-              </div>
-            </div>
-
-            <div class="statrow">
-              <div class="stat">
-                <span class="k">今日 tokens</span>
-                <span class="sv" id="det-today">—</span>
-              </div>
-              <div class="stat">
-                <span class="k">本月 tokens</span>
-                <span class="sv" id="det-month">—</span>
-              </div>
-            </div>
-
-            <div class="card">
-              <div class="cardhead">
-                <span class="title">会话</span>
-                <span class="state" id="det-sessions-state">—</span>
-              </div>
-              <div id="det-sessions"></div>
-            </div>
-
-            <div class="sysgrid">
-              <div class="syscell">
-                <span class="k">CPU</span>
-                <span class="sysval" id="det-cpu">—</span>
-                <div class="bar"><i id="det-cpu-bar"></i></div>
-              </div>
-              <div class="syscell">
-                <span class="k">MEM</span>
-                <span class="sysval" id="det-mem">—</span>
-                <div class="bar"><i id="det-mem-bar"></i></div>
-              </div>
-              <div class="syscell">
-                <span class="k">tok/s</span>
-                <span class="sysval" id="det-rate">0</span>
-              </div>
-            </div>
-            <div class="row">
-              <span class="k">更新</span>
-              <span class="v sm" id="det-updated">—</span>
-            </div>
-          </div>
+          <div id="rail"></div>
+          <div id="detail"></div>
+          <div id="panel"></div>
         </div>
       </div>
     </div>
@@ -703,9 +587,8 @@
       (function () {
         const api = window.sideDock;
         const $ = (id) => document.getElementById(id);
-        const RING_RADIUS = 15;
-        const RING_LENGTH = 2 * Math.PI * RING_RADIUS;
         const MODE_KEY = 'dsh.side-dock.expanded';
+        const ITEM_LABELS = { tokens: '本月 tokens', rate: 'tok/s', system: 'CPU / 内存' };
 
         let expanded = false;
         try {
@@ -713,6 +596,23 @@
         } catch {
           expanded = false;
         }
+        let settingsOpen = false;
+        let snapshot = null;
+        let settings = { providers: [], items: { tokens: true, rate: true, system: true } };
+        let settingsHold = 0; // ignore engine settings while our own save is in flight
+
+        /** Enabled providers in the order the user arranged them. */
+        function shownProviders(data) {
+          const byId = new Map((data.providers || []).map((provider) => [provider.id, provider]));
+          const list = [];
+          for (const id of settings.providers) {
+            const provider = byId.get(id);
+            if (provider) list.push(provider);
+          }
+          return list;
+        }
+
+        // ---------------------------------------------------------- utilities
 
         function clampPct(value) {
           const n = Number(value);
@@ -729,9 +629,10 @@
           return (n / 1e9).toFixed(2) + 'B';
         }
 
-        function money(wallet) {
-          const symbol = wallet && wallet.currency === 'USD' ? '$' : '¥';
-          const value = Number(wallet && wallet.total);
+        function money(balance) {
+          if (!balance) return '—';
+          const symbol = balance.currency === 'USD' ? '$' : '¥';
+          const value = Number(balance.total);
           return symbol + (Number.isFinite(value) ? value.toFixed(2) : '0.00');
         }
 
@@ -743,7 +644,7 @@
           }
         }
 
-        /** "5d 22h" / "5.0 小时" style remaining time, like Token Monitor's reset rows. */
+        /** "5d 22h" / "11.1 小时" style remaining time. */
         function fmtLeft(iso, compact) {
           const target = Date.parse(iso || '');
           if (!Number.isFinite(target)) return '—';
@@ -762,266 +663,410 @@
           return 'var(--accent)';
         }
 
-        function remainingPercent(entry) {
-          if (!entry) return null;
-          return clampPct(100 - clampPct(entry.percent));
+        function remainingPercent(window) {
+          if (!window) return null;
+          return clampPct(100 - clampPct(window.percent));
         }
 
-        function setRing(circle, remaining) {
-          if (!circle || remaining === null) return;
-          circle.style.strokeDasharray = String(RING_LENGTH);
-          circle.style.strokeDashoffset = String(RING_LENGTH * (1 - remaining / 100));
-          circle.style.stroke = usageColor(remaining);
+        function el(tag, className, text) {
+          const node = document.createElement(tag);
+          if (className) node.className = className;
+          if (text !== undefined && text !== null) node.textContent = String(text);
+          return node;
         }
 
-        function setBar(bar, remaining) {
-          if (!bar || remaining === null) return;
-          bar.style.width = remaining + '%';
-          bar.style.background = usageColor(remaining);
-        }
-
-        function setText(id, text) {
-          const element = $(id);
-          if (element) element.textContent = text;
-        }
-
-        function renderCredit(account) {
-          let amount = '—';
-          let sub = '';
-          let title = '';
-          if (!account) {
-            amount = '读取中';
-          } else if (account.status === 'signed-in') {
-            const wallets = Array.isArray(account.wallets) ? account.wallets : [];
-            const primary = wallets.find((w) => w.currency === 'CNY') || wallets[0];
-            amount = money(primary);
-            sub =
-              '充值 ¥' +
-              Number(primary ? primary.toppedUp : 0).toFixed(2) +
-              ' · 赠送 ¥' +
-              Number(primary ? primary.granted : 0).toFixed(2);
-            title = 'DeepSeek API 余额' + (account.available === false ? ' · 余额不足' : '');
-          } else if (account.status === 'signed-out') {
-            amount = '未登录';
-            sub = '未配置 DEEPSEEK_API_KEY';
-          } else if (account.status === 'loading') {
-            amount = '读取中';
-          } else {
-            amount = '—';
-            sub = account.error || '额度不可用';
+        function bar(remaining) {
+          const track = el('div', 'bar');
+          const fill = el('i');
+          if (remaining !== null) {
+            fill.style.width = remaining + '%';
+            fill.style.background = usageColor(remaining);
           }
-          setText('rail-credit', amount);
-          setText('det-credit', amount);
-          setText('det-credit-sub', sub || '—');
-          const rail = $('rail-credit');
-          if (rail) rail.title = title || sub;
+          track.appendChild(fill);
+          return track;
         }
 
-        function renderZen(zen) {
-          const status = zen && zen.status;
-          let stateText = '—';
-          if (!zen || status === 'no-key') stateText = '未配置 Key';
-          else if (status === 'loading') stateText = '读取中…';
-          else if (status === 'error') stateText = '查询失败';
-          else if (status === 'ok') stateText = '实时';
-          setText('det-zen-state', stateText);
-          const stateEl = $('det-zen-state');
-          if (stateEl) {
-            stateEl.style.color = status === 'ok' || status === 'loading' ? 'var(--fg2)' : 'var(--err)';
-            stateEl.title = zen && zen.error ? zen.error : '';
-          }
-
-          const rows = [
-            ['rolling', 'ring-rolling', 'ring-rolling-pct', 'ring-rolling-reset', 'det-rolling-left', 'bar-rolling', 'det-rolling-reset', true],
-            ['weekly', 'ring-weekly', 'ring-weekly-pct', 'ring-weekly-reset', 'det-weekly-left', 'bar-weekly', 'det-weekly-reset', false],
-            ['monthly', 'ring-monthly', 'ring-monthly-pct', 'ring-monthly-reset', 'det-monthly-left', 'bar-monthly', 'det-monthly-reset', false],
-          ];
-          for (const row of rows) {
-            const entry = zen && zen[row[0]];
-            const remaining = remainingPercent(entry);
-            if (row[1]) {
-              setRing($(row[1]), remaining);
-              setText(row[2], remaining === null ? '—' : Math.round(remaining) + '%');
-              const pctElement = $(row[2]);
-              if (pctElement) {
-                const limitedWindow = entry && entry.status && entry.status !== 'ok';
-                pctElement.style.color =
-                  limitedWindow || (remaining !== null && remaining <= 15) ? 'var(--err)' : 'inherit';
-              }
-              const limitedWindow = entry && entry.status && entry.status !== 'ok';
-              setText(
-                row[3],
-                remaining === null ? '—' : (limitedWindow ? '限流 · 剩 ' : '剩 ') + fmtLeft(entry && entry.resetsAt, row[7]),
-              );
+        function brandLogo(provider, size) {
+          if (provider.logo) {
+            const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+            svg.setAttribute('class', 'brand ' + provider.logo);
+            svg.setAttribute('viewBox', '0 0 24 24');
+            svg.setAttribute('aria-hidden', 'true');
+            if (size) {
+              svg.style.width = size + 'px';
+              svg.style.height = size + 'px';
             }
-            if (row[4]) {
-              const limited = entry && entry.status && entry.status !== 'ok';
-              const label =
-                remaining === null
-                  ? '—'
-                  : (limited ? '限流 · ' : '剩 ' + Math.round(remaining) + '% · ') +
-                    '已用 ' +
-                    Math.round(clampPct(entry.percent)) +
-                    '%';
-              setText(row[4], label);
-              const element = $(row[4]);
-              if (element) {
-                element.style.color = limited || remaining <= 15 ? 'var(--err)' : 'var(--fg)';
-              }
-            }
-            setBar($(row[5]), remaining);
-            setText(row[6], remaining === null ? '—' : '还有 ' + fmtLeft(entry && entry.resetsAt));
+            const use = document.createElementNS('http://www.w3.org/2000/svg', 'use');
+            use.setAttribute('href', '#i-' + provider.logo);
+            svg.appendChild(use);
+            return svg;
           }
+          const dot = el('i', 'pdot');
+          dot.style.background = provider.accent || 'var(--fg2)';
+          return dot;
         }
 
-        function renderSessions(sessions, totals) {
-          setText('rail-sessions', (totals.running || 0) + ' / ' + sessions.length);
-          setText('det-sessions-state', (totals.running || 0) + ' 运行 · 共 ' + sessions.length);
-
-          const container = $('det-sessions');
-          if (!container) return;
-          container.textContent = '';
-          if (!sessions.length) {
-            const empty = document.createElement('div');
-            empty.className = 'cardsub';
-            empty.textContent = '暂无活跃会话';
-            container.appendChild(empty);
-            return;
-          }
-          for (const session of sessions.slice(0, 4)) {
-            const box = document.createElement('div');
-            box.className = 'session';
-            box.title = [
-              session.title || session.id,
-              session.model || '',
-              '累计 ' + fmtTokens(session.totalTokens),
-              '入 ' + fmtTokens(session.usage.input) + ' / 出 ' + fmtTokens(session.usage.output),
-            ]
-              .filter(Boolean)
-              .join('\n');
-
-            const line1 = document.createElement('div');
-            line1.className = 's1';
-            const dot = document.createElement('span');
-            dot.className = 'dot' + (session.running ? ' running' : '');
-            const name = document.createElement('span');
-            name.className = 'sname';
-            name.textContent = session.title || session.id.slice(0, 16);
-            const tokens = document.createElement('span');
-            tokens.className = 'stok';
-            tokens.textContent = fmtTokens(session.totalTokens);
-            line1.appendChild(dot);
-            line1.appendChild(name);
-            line1.appendChild(tokens);
-
-            const line2 = document.createElement('div');
-            line2.className = 's2';
-            const meta = document.createElement('span');
-            meta.className = 'smeta';
-            meta.textContent = session.model || (session.running ? '运行中' : '空闲');
-            const ratio =
-              session.contextWindow && session.contextTokens !== null
-                ? clampPct((session.contextTokens / session.contextWindow) * 100)
-                : null;
-            const ctx = document.createElement('span');
-            ctx.textContent = ratio === null ? '' : '上下文 ' + Math.round(ratio) + '%';
-            line2.appendChild(meta);
-            line2.appendChild(ctx);
-
-            const bar = document.createElement('div');
-            bar.className = 'bar';
-            const fill = document.createElement('i');
-            if (ratio !== null) {
-              fill.style.width = ratio + '%';
-              fill.style.background = ratio >= 85 ? 'var(--err)' : ratio >= 65 ? 'var(--warn)' : 'var(--accent)';
-            }
-            bar.appendChild(fill);
-
-            box.appendChild(line1);
-            box.appendChild(line2);
-            box.appendChild(bar);
-            container.appendChild(box);
-          }
+        function dot(provider) {
+          const node = el('i', 'pdot');
+          node.style.background = provider.accent || 'var(--fg2)';
+          return node;
         }
 
-        function renderSystem(data) {
-          const cpu = clampPct(data.cpu ? data.cpu.percent : 0);
-          const mem = clampPct(data.memory ? data.memory.percent : 0);
-          setText('rail-cpu', Math.round(cpu) + '%');
-          setText('rail-mem', Math.round(mem) + '%');
-          setText('det-cpu', Math.round(cpu) + '%');
-          setText('det-mem', Math.round(mem) + '%');
-          const color = (value) => (value >= 85 ? 'var(--err)' : value >= 65 ? 'var(--warn)' : 'inherit');
-          const fill = (bar, value) => {
-            const el = $(bar);
-            if (!el) return;
-            el.style.width = value + '%';
-            el.style.background =
-              value >= 85 ? 'var(--err)' : value >= 65 ? 'var(--warn)' : 'var(--accent)';
-          };
-          for (const id of ['rail-cpu', 'det-cpu']) {
-            const el = $(id);
-            if (el) el.style.color = color(cpu);
-          }
-          for (const id of ['rail-mem', 'det-mem']) {
-            const el = $(id);
-            if (el) el.style.color = color(mem);
-          }
-          fill('rail-cpu-bar', cpu);
-          fill('rail-mem-bar', mem);
-          fill('det-cpu-bar', cpu);
-          fill('det-mem-bar', mem);
+        function statusText(provider) {
+          if (provider.status === 'no-key') return '未配置 Key';
+          if (provider.status === 'error') return '查询失败';
+          if (provider.status === 'loading') return '读取中…';
+          if (provider.status === 'warning') return '余额不足';
+          return '实时';
         }
 
-        let reportedStats = false;
-        function render(payload) {
-          const offline = Boolean(payload && payload.offline);
-          if (!reportedStats && payload && payload.data) {
-            reportedStats = true;
-            if (api.report) {
-              api.report(
-                'stats received today=' +
-                  payload.data.history.today +
-                  ' tokens=' +
-                  payload.data.totals.total +
-                  ' account=' +
-                  payload.data.account.status +
-                  ' zen=' +
-                  payload.data.zen.status,
-              );
+        function keyHint(provider) {
+          return provider.envKey ? '未配置 Key · 设 ' + provider.envKey : '未配置 Key';
+        }
+
+        function detailSub(provider) {
+          if (provider.kind === 'balance') {
+            const balance = provider.balance;
+            if (!balance) return provider.status === 'no-key' ? keyHint(provider) : statusText(provider);
+            const parts = [];
+            const spent = Number(balance.spent);
+            if (Number(balance.toppedUp) > 0) parts.push('充值 ' + money({ currency: balance.currency, total: balance.toppedUp }));
+            if (Number(balance.granted) > 0) parts.push('赠送 ' + money({ currency: balance.currency, total: balance.granted }));
+            if (Number.isFinite(spent) && spent > 0) parts.push('已用 ' + money({ currency: balance.currency, total: spent }));
+            return parts.join(' · ');
+          }
+          if (!provider.windows || !provider.windows.length) {
+            return provider.status === 'no-key' ? keyHint(provider) : statusText(provider);
+          }
+          return '';
+        }
+
+        function railSub(provider) {
+          const sub = detailSub(provider);
+          return sub && sub.length > 26 ? sub.slice(0, 25) + '…' : sub;
+        }
+
+        // ------------------------------------------------------------- rail
+
+        function railProvider(provider) {
+          const block = el('div', 'pblock');
+          const name = el('div', 'pname');
+          name.appendChild(brandLogo(provider, 10));
+          name.appendChild(el('span', null, provider.name));
+          block.appendChild(name);
+
+          if (provider.kind === 'balance') {
+            block.appendChild(el('div', 'big', money(provider.balance)));
+            const sub = railSub(provider);
+            if (sub) block.appendChild(el('div', 'psub', sub));
+            return block;
+          }
+
+          if (!provider.windows || !provider.windows.length) {
+            block.appendChild(el('div', 'big', '—'));
+            const sub = railSub(provider);
+            if (sub) block.appendChild(el('div', 'psub', sub));
+            return block;
+          }
+
+          for (const window of provider.windows) {
+            const remaining = remainingPercent(window);
+            const limited = window.status && window.status !== 'ok';
+            const mini = el('div', 'mini');
+            const top = el('div', 'mrow');
+            top.appendChild(el('span', 'mlabel', window.label));
+            const pct = el('span', 'mpct', remaining === null ? '—' : Math.round(remaining) + '%');
+            if (limited) {
+              pct.textContent = '限流';
+              pct.style.color = 'var(--err)';
+            } else if (remaining !== null && remaining <= 15) {
+              pct.style.color = 'var(--err)';
             }
+            top.appendChild(pct);
+            mini.appendChild(top);
+            mini.appendChild(bar(remaining));
+            mini.appendChild(el('div', 'msub', remaining === null ? '—' : '剩 ' + fmtLeft(window.resetsAt, true)));
+            block.appendChild(mini);
           }
-          $('banner').classList.toggle('show', offline);
-          if (offline) $('banner').title = payload && payload.error ? payload.error : '';
+          return block;
+        }
 
-          const data = payload && payload.data ? payload.data : null;
-          if (!data) {
-            renderCredit(null);
-            renderZen(null);
-            return;
+        function renderRail(data) {
+          const box = $('rail');
+          box.textContent = '';
+          const enabled = shownProviders(data);
+          if (!enabled.length) {
+            box.appendChild(el('div', 'empty', '没有选择供应商。点 ⚙ 勾选要显示的额度或余额。'));
+          }
+          for (const provider of enabled) box.appendChild(railProvider(provider));
+
+          const footer = el('div');
+          footer.appendChild(el('div', 'rule'));
+          if (settings.items.tokens) {
+            const row = el('div', 'row');
+            row.appendChild(el('span', 'k', '本月'));
+            row.appendChild(el('span', 'v sm', fmtTokens(data.history.month)));
+            footer.appendChild(row);
+          }
+          if (settings.items.rate) {
+            const rate = Number(data.history.ratePerSecond) || 0;
+            const row = el('div', 'row');
+            row.appendChild(el('span', 'k', 'tok/s'));
+            row.appendChild(el('span', 'v sm', rate >= 10 ? String(Math.round(rate)) : rate.toFixed(1)));
+            footer.appendChild(row);
+          }
+          if (settings.items.system) {
+            const grid = el('div', 'sysgrid');
+            grid.appendChild(systemCell('CPU', data.cpu ? clampPct(data.cpu.percent) : 0, 'rail-cpu'));
+            grid.appendChild(systemCell('MEM', data.memory ? clampPct(data.memory.percent) : 0, 'rail-mem'));
+            footer.appendChild(grid);
+          }
+          const updated = el('div', 'row');
+          updated.appendChild(el('span', 'k', '更新'));
+          updated.appendChild(el('span', 'v sm', clock(data.time || Date.now())));
+          footer.appendChild(updated);
+          box.appendChild(footer);
+        }
+
+        function systemCell(label, percent, key) {
+          const cell = el('div', 'syscell');
+          cell.appendChild(el('span', 'k', label));
+          const value = el('span', 'sysval', Math.round(percent) + '%');
+          value.style.color = percent >= 85 ? 'var(--err)' : percent >= 65 ? 'var(--warn)' : 'inherit';
+          cell.appendChild(value);
+          cell.appendChild(bar(percent));
+          const fill = cell.querySelector('.bar > i');
+          if (fill) fill.style.background = percent >= 85 ? 'var(--err)' : percent >= 65 ? 'var(--warn)' : 'var(--accent)';
+          if (key) cell.id = key;
+          return cell;
+        }
+
+        // ----------------------------------------------------------- detail
+
+        function detailProvider(provider) {
+          const card = el('div', 'card');
+          const head = el('div', 'cardhead');
+          head.appendChild(brandLogo(provider, 12));
+          head.appendChild(el('span', 'title', provider.name));
+
+          if (provider.kind === 'balance') {
+            head.appendChild(el('span', 'headval', money(provider.balance)));
+            card.appendChild(head);
+            const sub = detailSub(provider);
+            if (sub) card.appendChild(el('div', 'cardsub', sub));
+            return card;
           }
 
-          renderCredit(data.account);
-          renderZen(data.zen);
+          const state = el('span', 'state', statusText(provider));
+          if (provider.status === 'no-key' || provider.status === 'error') state.style.color = 'var(--err)';
+          if (provider.error) state.title = provider.error;
+          head.appendChild(state);
+          card.appendChild(head);
 
-          const totals = data.totals || {};
-          const sessions = Array.isArray(data.sessions) ? data.sessions : [];
-          const history = data.history || { today: 0, month: 0, ratePerSecond: 0 };
-          const rate = Number(history.ratePerSecond) || 0;
-          const rateText = rate >= 10 ? String(Math.round(rate)) : rate.toFixed(1);
+          if (!provider.windows || !provider.windows.length) {
+            const sub = detailSub(provider);
+            if (sub) card.appendChild(el('div', 'cardsub', sub));
+            return card;
+          }
 
-          setText('rail-today', fmtTokens(history.today));
-          setText('rail-rate', rateText);
-          setText('det-today', fmtTokens(history.today));
-          setText('det-month', fmtTokens(history.month));
-          setText('det-rate', rateText);
+          for (const window of provider.windows) {
+            const remaining = remainingPercent(window);
+            const limited = window.status && window.status !== 'ok';
+            const row = el('div', 'qrow');
+            const top = el('div', 'qtop');
+            top.appendChild(el('span', 'qlabel', window.label));
+            const value = el(
+              'span',
+              'qv',
+              remaining === null
+                ? '—'
+                : (limited ? '限流 · ' : '剩 ' + Math.round(remaining) + '% · ') + '已用 ' + Math.round(clampPct(window.percent)) + '%',
+            );
+            value.style.color = limited || (remaining !== null && remaining <= 15) ? 'var(--err)' : 'var(--fg)';
+            top.appendChild(value);
+            row.appendChild(top);
+            row.appendChild(bar(remaining));
+            const sub = el('div', 'qsub');
+            sub.appendChild(el('span', null, '重置'));
+            sub.appendChild(el('span', null, remaining === null ? '—' : '还有 ' + fmtLeft(window.resetsAt)));
+            row.appendChild(sub);
+            card.appendChild(row);
+          }
+          return card;
+        }
 
-          renderSessions(sessions, totals);
-          renderSystem(data);
+        function renderDetail(data) {
+          const box = $('detail');
+          box.textContent = '';
+          const enabled = shownProviders(data);
+          if (!enabled.length) {
+            const card = el('div', 'card');
+            card.appendChild(el('div', 'cardsub', '没有选择供应商。点上方 ⚙ 勾选要显示的额度或余额。'));
+            box.appendChild(card);
+          }
+          for (const provider of enabled) box.appendChild(detailProvider(provider));
 
-          const time = clock(data.time || Date.now());
-          setText('rail-updated', time);
-          setText('det-updated', time);
+          const stats = [];
+          if (settings.items.tokens) stats.push(['本月 tokens', fmtTokens(data.history.month)]);
+          if (settings.items.rate) {
+            const rate = Number(data.history.ratePerSecond) || 0;
+            stats.push(['tok/s', rate >= 10 ? String(Math.round(rate)) : rate.toFixed(1)]);
+          }
+          if (stats.length) {
+            const row = el('div', 'statrow');
+            for (const [label, value] of stats) {
+              const stat = el('div', 'stat');
+              stat.appendChild(el('span', 'k', label));
+              stat.appendChild(el('span', 'sv', value));
+              row.appendChild(stat);
+            }
+            box.appendChild(row);
+          }
+
+          if (settings.items.system) {
+            const grid = el('div', 'sysgrid');
+            grid.appendChild(systemCell('CPU', data.cpu ? clampPct(data.cpu.percent) : 0));
+            grid.appendChild(systemCell('MEM', data.memory ? clampPct(data.memory.percent) : 0));
+            box.appendChild(grid);
+          }
+
+          const updated = el('div', 'row');
+          updated.appendChild(el('span', 'k', '更新'));
+          updated.appendChild(el('span', 'v sm', clock(data.time || Date.now())));
+          box.appendChild(updated);
+        }
+
+        // ---------------------------------------------------------- settings
+
+        function switchControl(checked, onChange) {
+          const label = el('label', 'sw');
+          const input = document.createElement('input');
+          input.type = 'checkbox';
+          input.checked = checked;
+          input.addEventListener('change', () => onChange(input.checked));
+          label.appendChild(input);
+          label.appendChild(el('i'));
+          return label;
+        }
+
+        function moveProvider(id, direction) {
+          const order = settings.providers.slice();
+          const index = order.indexOf(id);
+          if (index < 0) return;
+          const next = index + direction;
+          if (next < 0 || next >= order.length) return;
+          order.splice(index, 1);
+          order.splice(next, 0, id);
+          void saveSettings({ providers: order });
+        }
+
+        function toggleProvider(id, enabled) {
+          const order = settings.providers.filter((entry) => entry !== id);
+          if (enabled) order.push(id);
+          void saveSettings({ providers: order });
+        }
+
+        function renderPanel() {
+          const box = $('panel');
+          box.textContent = '';
+
+          const head = el('div', 'panelhead');
+          head.appendChild(el('span', 'title', '显示项'));
+          const done = el('button', null, '完成');
+          done.addEventListener('click', () => {
+            settingsOpen = false;
+            applyMode();
+          });
+          head.appendChild(done);
+          box.appendChild(head);
+
+          const list = el('div', 'card');
+          list.appendChild(el('div', 'cardsub', '供应商 — 勾选要显示的余额或额度'));
+          const providers = (snapshot && snapshot.providers) || [];
+          for (const provider of providers) {
+            const enabled = settings.providers.includes(provider.id);
+            const item = el('div', 'pitem');
+            item.appendChild(dot(provider));
+            const meta = el('div', 'pmeta');
+            meta.appendChild(el('span', 'pn', provider.name));
+            const note = el('span', 'po', provider.configured ? provider.note : provider.note + ' · 未配置 Key');
+            if (!provider.configured) note.className = 'po warn';
+            meta.appendChild(note);
+            item.appendChild(meta);
+
+            const ctl = el('div', 'pctl');
+            const position = settings.providers.indexOf(provider.id);
+            const up = el('button', null, '▲');
+            up.title = '上移';
+            up.disabled = !enabled || position <= 0;
+            up.addEventListener('click', () => moveProvider(provider.id, -1));
+            const down = el('button', null, '▼');
+            down.title = '下移';
+            down.disabled = !enabled || position < 0 || position >= settings.providers.length - 1;
+            down.addEventListener('click', () => moveProvider(provider.id, 1));
+            ctl.appendChild(up);
+            ctl.appendChild(down);
+            ctl.appendChild(switchControl(enabled, (checked) => toggleProvider(provider.id, checked)));
+            item.appendChild(ctl);
+            list.appendChild(item);
+          }
+          box.appendChild(list);
+
+          const extras = el('div', 'card');
+          extras.appendChild(el('div', 'cardsub', '其他显示项'));
+          for (const key of Object.keys(ITEM_LABELS)) {
+            const row = el('div', 'pitem');
+            const meta = el('div', 'pmeta');
+            meta.appendChild(el('span', 'pn', ITEM_LABELS[key]));
+            row.appendChild(meta);
+            const ctl = el('div', 'pctl');
+            ctl.appendChild(
+              switchControl(Boolean(settings.items[key]), (checked) => {
+                const items = { ...settings.items, [key]: checked };
+                void saveSettings({ items });
+              }),
+            );
+            row.appendChild(ctl);
+            extras.appendChild(row);
+          }
+          box.appendChild(extras);
+
+          box.appendChild(el('div', 'hint', '选择会保存在 ~/.side-dock/config.json。Key 依次从环境变量、DSH 凭据库、该文件的 *ApiKey 字段读取。'));
+        }
+
+        // ------------------------------------------------------------- state
+
+        async function saveSettings(patch) {
+          settingsHold = Date.now() + 2000;
+          try {
+            const saved = await api.saveSettings(patch);
+            if (saved) settings = saved;
+          } catch (error) {
+            if (api.report) api.report('save settings failed: ' + String(error));
+          }
+          paint();
+        }
+
+        function paint() {
+          if (!snapshot) return;
+          const data = snapshot;
+          if (document.body.classList.contains('mode-rail')) renderRail(data);
+          else if (document.body.classList.contains('mode-detail')) renderDetail(data);
+          else renderPanel();
+        }
+
+        function applyMode() {
+          const mode = settingsOpen ? 'panel' : expanded ? 'detail' : 'rail';
+          document.body.classList.remove('mode-rail', 'mode-detail', 'mode-panel');
+          document.body.classList.add('mode-' + mode);
+          const modeButton = $('btn-mode');
+          if (modeButton) {
+            modeButton.textContent = expanded ? '⤡' : '⤢';
+            modeButton.title = expanded ? '收起为侧边条' : '展开详情';
+          }
+          const settingsButton = $('btn-settings');
+          if (settingsButton) settingsButton.classList.toggle('on', settingsOpen);
+          paint();
         }
 
         function applyState(next) {
@@ -1029,15 +1074,21 @@
           document.body.dataset.snap = snap;
         }
 
-        function applyMode() {
-          document.body.classList.toggle('expanded', expanded);
-          document.body.classList.toggle('rail', !expanded);
-          const button = $('btn-mode');
-          if (button) {
-            button.textContent = expanded ? '⤡' : '⤢';
-            button.title = expanded ? '收起为侧边条' : '展开详情';
+        function setSnapshot(payload) {
+          const offline = Boolean(payload && payload.offline);
+          $('banner').classList.toggle('show', offline);
+          if (offline) $('banner').title = payload && payload.error ? payload.error : '';
+          const data = payload && payload.data ? payload.data : null;
+          if (data) {
+            snapshot = data;
+            // The engine is the source of truth, except right after a save:
+            // an in-flight poll can still carry the pre-save settings.
+            if (data.settings && Date.now() > settingsHold) settings = data.settings;
           }
+          paint();
         }
+
+        // ------------------------------------------------------------- wiring
 
         window.addEventListener('error', (event) => {
           if (api && api.report) api.report('error: ' + (event && event.message ? event.message : 'unknown'));
@@ -1046,16 +1097,29 @@
           if (api && api.report) api.report('rejection: ' + String(event && event.reason));
         });
 
-        api.onStats(render);
+        api.onStats(setSnapshot);
         api.onState(applyState);
 
         $('btn-mode').onclick = () => {
           expanded = !expanded;
+          settingsOpen = false;
           try {
             window.localStorage.setItem(MODE_KEY, expanded ? '1' : '0');
           } catch {
             /* ignore */
           }
+          applyMode();
+        };
+        $('btn-settings').onclick = () => {
+          if (!expanded) {
+            expanded = true;
+            try {
+              window.localStorage.setItem(MODE_KEY, '1');
+            } catch {
+              /* ignore */
+            }
+          }
+          settingsOpen = !settingsOpen;
           applyMode();
         };
         $('btn-flip').onclick = () => api.flip().then(applyState);
@@ -1091,17 +1155,19 @@
 
         applyMode();
         Promise.all([api.init(), api.latest()])
-          .then(([init, snapshot]) => {
+          .then(([init, latest]) => {
             applyState(init || {});
-            if (snapshot) render(snapshot);
-            else render(null);
+            if (latest) setSnapshot(latest);
+            else paint();
             if (api.report) {
-              const text = (document.body.innerText || '').replace(/\s+/g, ' ').slice(0, 160);
+              const text = (document.body.innerText || '').replace(/\s+/g, ' ').slice(0, 180);
               api.report(
                 'renderer ready snap=' +
                   document.body.dataset.snap +
                   ' mode=' +
-                  (expanded ? 'expanded' : 'rail') +
+                  document.body.className +
+                  ' providers=' +
+                  settings.providers.join(',') +
                   ' [' +
                   text +
                   ']',
@@ -1109,7 +1175,6 @@
             }
           })
           .catch((error) => {
-            render(null);
             if (api.report) api.report('init failed: ' + String(error));
           });
       })();

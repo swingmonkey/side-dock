@@ -1,0 +1,92 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
+  <!--
+    Side Dock mark: a slim bar docked at the edge, three quota rings inside it,
+    and the readings it emits (three arcs) sweeping away from the bar.
+    Source of truth for assets/icon.png (1024×1024, transparent).
+  -->
+  <defs>
+    <linearGradient id="bg" x1="0.12" y1="0" x2="0.88" y2="1">
+      <stop offset="0" stop-color="#2c3b49" />
+      <stop offset="0.45" stop-color="#18212a" />
+      <stop offset="1" stop-color="#0a0f14" />
+    </linearGradient>
+
+    <radialGradient id="aura" cx="0.6" cy="0.5" r="0.46">
+      <stop offset="0" stop-color="#39d3c5" stop-opacity="0.26" />
+      <stop offset="0.55" stop-color="#2f6ef0" stop-opacity="0.09" />
+      <stop offset="1" stop-color="#2f6ef0" stop-opacity="0" />
+    </radialGradient>
+
+    <radialGradient id="sheen" cx="0.34" cy="0.02" r="0.72">
+      <stop offset="0" stop-color="#ffffff" stop-opacity="0.14" />
+      <stop offset="0.55" stop-color="#ffffff" stop-opacity="0.03" />
+      <stop offset="1" stop-color="#ffffff" stop-opacity="0" />
+    </radialGradient>
+
+    <linearGradient id="beam" x1="0.5" y1="0" x2="0.5" y2="1">
+      <stop offset="0" stop-color="#6cf0da" />
+      <stop offset="0.42" stop-color="#3fcfc4" />
+      <stop offset="0.78" stop-color="#4f8ff5" />
+      <stop offset="1" stop-color="#4d6bfe" />
+    </linearGradient>
+
+    <linearGradient id="arc" x1="0.2" y1="0" x2="0.8" y2="1">
+      <stop offset="0" stop-color="#6cf0da" />
+      <stop offset="0.55" stop-color="#3fcfc4" />
+      <stop offset="1" stop-color="#4d6bfe" />
+    </linearGradient>
+
+    <linearGradient id="gloss" x1="0.5" y1="0" x2="0.5" y2="1">
+      <stop offset="0" stop-color="#ffffff" stop-opacity="0.5" />
+      <stop offset="0.55" stop-color="#ffffff" stop-opacity="0.06" />
+      <stop offset="1" stop-color="#ffffff" stop-opacity="0" />
+    </linearGradient>
+
+    <filter id="lift" x="-60%" y="-40%" width="220%" height="180%">
+      <feDropShadow dx="0" dy="16" stdDeviation="28" flood-color="#000000" flood-opacity="0.45" />
+    </filter>
+
+    <filter id="halo" x="-80%" y="-40%" width="260%" height="180%">
+      <feGaussianBlur stdDeviation="34" />
+    </filter>
+  </defs>
+
+  <!-- squircle body -->
+  <rect x="96" y="96" width="832" height="832" rx="196" fill="url(#bg)" />
+  <rect x="96" y="96" width="832" height="832" rx="196" fill="url(#aura)" />
+  <rect x="96" y="96" width="832" height="832" rx="196" fill="url(#sheen)" />
+
+  <!-- emitted arcs (quota readings spreading away from the bar) -->
+  <g fill="none" stroke="url(#arc)" stroke-linecap="round">
+    <path d="M608 212 A300 300 0 0 0 608 812" stroke-width="36" opacity="0.42" />
+    <path d="M608 297 A215 215 0 0 0 608 727" stroke-width="40" opacity="0.72" />
+    <path d="M608 382 A130 130 0 0 0 608 642" stroke-width="44" opacity="1" />
+  </g>
+
+  <!-- the dock bar -->
+  <rect x="608" y="264" width="96" height="496" rx="48" fill="#3fcfc4" opacity="0.4" filter="halo" />
+  <g filter="lift">
+    <rect x="608" y="264" width="96" height="496" rx="48" fill="url(#beam)" />
+  </g>
+  <rect x="608" y="264" width="96" height="496" rx="48" fill="url(#gloss)" opacity="0.35" />
+
+  <!-- three quota rings, as they appear in the strip -->
+  <g fill="none" stroke="#ffffff" stroke-linecap="round">
+    <circle cx="656" cy="428" r="15" stroke-width="7" opacity="0.92" />
+    <circle cx="656" cy="512" r="15" stroke-width="7" opacity="0.92" />
+    <circle cx="656" cy="596" r="15" stroke-width="7" opacity="0.92" />
+  </g>
+
+  <!-- inner rim -->
+  <rect
+    x="97.5"
+    y="97.5"
+    width="829"
+    height="829"
+    rx="194.5"
+    fill="none"
+    stroke="#ffffff"
+    stroke-opacity="0.1"
+    stroke-width="3"
+  />
+</svg>

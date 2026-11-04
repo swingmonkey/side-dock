@@ -21,6 +21,8 @@ contextBridge.exposeInMainWorld('sideDock', {
   setWidth: (width) => ipcRenderer.invoke('side-dock:set-width', width),
   open: (url) => ipcRenderer.invoke('side-dock:open', url),
   refresh: () => ipcRenderer.invoke('side-dock:refresh'),
+  getSettings: () => ipcRenderer.invoke('side-dock:settings:get'),
+  saveSettings: (patch) => ipcRenderer.invoke('side-dock:settings:save', patch),
   setHeight: (height) => ipcRenderer.invoke('side-dock:set-height', height),
   fit: (size) => ipcRenderer.invoke('side-dock:fit', size),
   closeDesktop: () => ipcRenderer.invoke('side-dock:close'),
